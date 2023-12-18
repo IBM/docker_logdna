@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+  mock_client:
+    image: mock_client
+    environment:
+      MOCK_ADDRESS: 127.0.0.1:9000
+      MOCK_SEED: 69420
+      MOCK_LINES_PER_SEC: 999999999999
+      MOCK_LINES_AMOUNT: 1000000
+      MOCK_MAX_SLOW_STREAK: 0
+      # ' '
+      MOCK_CHAR_MIN: 32
+      # '~' + 1
+      MOCK_CHAR_MAX: 127
+      MOCK_STR_LEN_MIN: 99
+      MOCK_STR_LEN_MAX: 100
+      MOCK_INGESTER_DELAY: 100
+      MOCK_SERVER_TIMEOUT: 60000
+    logging:
+      driver: logdna
+      options:
+        api_key: something
+        logdna_host: 127.0.0.1:9000
+        for_mock_server: "true"
+        # logdna_host: logs.eu-de.logging.cloud.ibm.com
+        # api_key: YOUR_API_KEY
+  #   depends_on:
+  #     - DockerLogDNA
+  # DockerLogDNA:
+  #   container_name: logdna
+  #   image: http-logspout
+  #   environment:
+  #     - LOGDNA_KEY=something
+  #     - LOGDNA_URL=127.0.0.1:9000/logs/agent
+  #   volumes:
+  #     # - "/run/user/2001/docker.sock:/var/run/docker.sock"
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #   network_mode: host
