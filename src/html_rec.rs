@@ -75,7 +75,12 @@ pub async fn handle_connection<D: AsyncWrite + AsyncRead + Unpin>(
     let offset = match res {
         httparse::Status::Complete(v) => v,
         httparse::Status::Partial => {
-            format!("Request is bigger than {} bytes", BUF_SIZE);
+            return_err(
+                stream,
+                format!("Request is bigger than {} bytes", BUF_SIZE),
+                500,
+            )
+            .await;
             return;
         }
     };
