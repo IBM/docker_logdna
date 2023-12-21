@@ -4,7 +4,6 @@ use std::str::from_utf8;
 use std::sync::Arc;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite};
 use tokio::net::UnixListener;
-use tokio::runtime::Runtime;
 
 use crate::consume_log::consume_log;
 use crate::get_container::get_container;
@@ -16,7 +15,7 @@ use crate::structs::{CloseNotify, StartRequest, StopRequest};
 // MY attempts at mocking docker failed with stack overflow errors.
 // The missing tests are not that important since these functions are already being extensively
 // tested using end to end tests. Additionally they are very linear in nature.
-pub async fn await_connections(rt: &Runtime, socket_path: String) {
+pub async fn await_connections(socket_path: String) {
     let mut close_notifcations: HashMap<String, Arc<CloseNotify>> = HashMap::new();
 
     println!("listing on unix socket '{}'", socket_path);
@@ -33,12 +32,11 @@ pub async fn await_connections(rt: &Runtime, socket_path: String) {
                 continue;
             }
         };
-        handle_connection(rt, &mut close_notifcations, stream).await;
+        handle_connection(&mut close_notifcations, stream).await;
     }
 }
 
 pub async fn handle_connection<D: AsyncWrite + AsyncRead + Unpin>(
-    rt: &Runtime,
     close_notifcations: &mut HashMap<String, Arc<CloseNotify>>,
     mut stream: D,
 ) {
@@ -92,7 +90,7 @@ pub async fn handle_connection<D: AsyncWrite + AsyncRead + Unpin>(
     assert!(end <= BUF_SIZE);
     match req.path {
         Some("/LogDriver.StartLogging") => {
-            start_logging(rt, close_notifcations, stream, &buf[offset..end]).await
+            start_logging(close_notifcations, stream, &buf[offset..end]).await
         }
         Some("/LogDriver.StopLogging") => {
             stop_logging(close_notifcations, stream, &buf[offset..end]).await
@@ -107,7 +105,6 @@ pub async fn handle_connection<D: AsyncWrite + AsyncRead + Unpin>(
 }
 
 async fn start_logging<D: AsyncWrite + Unpin>(
-    rt: &Runtime,
     close_notifcations: &mut HashMap<String, Arc<CloseNotify>>,
     stream: D,
     jsonbody: &[u8],
@@ -193,7 +190,7 @@ async fn start_logging<D: AsyncWrite + Unpin>(
         "watching {} container roughly right now",
         close_notifcations.len()
     );
-    rt.spawn(consume_log(close_notify, container));
+    tokio::spawn(consume_log(close_notify, container));
 
     return_ok(stream, json!({})).await;
 }
