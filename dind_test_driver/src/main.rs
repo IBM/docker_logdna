@@ -1,14 +1,11 @@
 use futures::future::join_all;
-use gethostname::gethostname;
 use logdna_mock::{make_panic_exit, mock_server, TestCfg, TestType};
-use std::net::TcpStream;
 use std::{net::SocketAddr, time::Duration};
 use tokio::process::Command;
-use tokio::time::sleep;
 
-const CONTAINER_AMOUNT: usize = 1;
-const LINES_PER_SEC: f64 = 2.0;
-const LINES_AMOUNT: usize = 20;
+const CONTAINER_AMOUNT: usize = 10;
+const LINES_PER_SEC: f64 = 500.0;
+const LINES_AMOUNT: usize = 10000;
 const MAX_SLOW_STREAK: u64 = 0;
 const CHAR_MIN: u8 = ' ' as u8;
 const CHAR_MAX: u8 = '~' as u8 + 1;
@@ -51,7 +48,6 @@ async fn start_client_server_pair(i: usize) {
 
     let return_status = tokio::join!(
         mock_server(cfg),
-        test(),
         Command::new(match in_dind {
             true => "docker-entrypoint.sh",
             false => "docker",
@@ -107,22 +103,22 @@ async fn start_client_server_pair(i: usize) {
         .unwrap()
         .wait_with_output()
     )
-    .2
+    .1
     .unwrap()
     .status;
 
     assert_eq!(return_status.code(), Some(0));
 }
 
-async fn test() {
-    Command::new("journalctl")
-        .arg("--user")
-        .arg("-fu")
-        .arg("docker.service")
-        .arg("--no-pager")
-        .spawn()
-        .unwrap()
-        .wait_with_output()
-        .await
-        .unwrap();
-}
+// async fn test() {
+//     Command::new("journalctl")
+//         .arg("--user")
+//         .arg("-fu")
+//         .arg("docker.service")
+//         .arg("--no-pager")
+//         .spawn()
+//         .unwrap()
+//         .wait_with_output()
+//         .await
+//         .unwrap();
+// }

@@ -96,17 +96,29 @@ pub fn rng_check_lines(
     lines: &Vec<Line>,
 ) {
     for line in lines {
-        rng_check_line(&cfg, rng, &line);
+        if *count == 0 {
+            assert_eq!(
+                match &line.line {
+                    Some(v) => Some(v.replace("\r", "")),
+                    None => None,
+                },
+                Some("Critical: docker_logdna starting to log".to_string())
+            );
+        } else {
+            rng_check_line(&cfg, rng, &line);
+        }
         *count += 1;
         if *count % 1000 == 0 {
             println!("{}", count);
         }
-        if *count >= cfg.lines_amount {
+        // don't forget first critical line
+        if *count > cfg.lines_amount {
             inner_notify_stop.notify_one();
         }
     }
 }
 
+// don't check for first critical line here
 pub fn vec_check_lines(
     cfg: &TestCfg,
     count: &mut usize,
@@ -138,20 +150,31 @@ pub fn check_line_lengths(
     lines: &Vec<Line>,
 ) {
     for line in lines {
-        match &line.line {
-            Some(l) => {
-                assert!(
-                    l.replace("\r", "").len() >= cfg.string_len_range.start
-                        && l.replace("\r", "").len() < cfg.string_len_range.end
-                )
+        if *count == 0 {
+            assert_eq!(
+                match &line.line {
+                    Some(v) => Some(v.replace("\r", "")),
+                    None => None,
+                },
+                Some("Critical: docker_logdna starting to log".to_string())
+            );
+        } else {
+            match &line.line {
+                Some(l) => {
+                    assert!(
+                        l.replace("\r", "").len() >= cfg.string_len_range.start
+                            && l.replace("\r", "").len() < cfg.string_len_range.end
+                    )
+                }
+                None => (),
             }
-            None => (),
         }
         *count += 1;
         if *count % 1000 == 0 {
             println!("{}", count);
         }
-        if *count >= cfg.lines_amount {
+        // don't forget first critical line
+        if *count > cfg.lines_amount {
             inner_notify_stop.notify_one();
         }
     }
@@ -211,6 +234,7 @@ pub async fn mock_server(cfg: TestCfg) {
                     inner_notify_stop.clone(),
                     &body.lines,
                 ),
+                // TODO: add first critical line check
                 TestType::Retry => {
                     println!("{}", *proc_count.lock().unwrap());
                     assert_eq!(
