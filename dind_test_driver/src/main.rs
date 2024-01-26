@@ -3,7 +3,7 @@ use logdna_mock::{make_panic_exit, mock_server, TestCfg, TestType};
 use std::{net::SocketAddr, time::Duration};
 use tokio::process::Command;
 
-const CONTAINER_AMOUNT: usize = 10;
+const CONTAINER_AMOUNT: usize = 20;
 const LINES_PER_SEC: f64 = 500.0;
 const LINES_AMOUNT: usize = 10000;
 const MAX_SLOW_STREAK: u64 = 0;
@@ -109,16 +109,3 @@ async fn start_client_server_pair(i: usize) {
 
     assert_eq!(return_status.code(), Some(0));
 }
-
-// async fn test() {
-//     Command::new("journalctl")
-//         .arg("--user")
-//         .arg("-fu")
-//         .arg("docker.service")
-//         .arg("--no-pager")
-//         .spawn()
-//         .unwrap()
-//         .wait_with_output()
-//         .await
-//         .unwrap();
-// }
