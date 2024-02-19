@@ -18,6 +18,9 @@ If you really want, you can also set logdna as the [default logging driver](http
 
 To uninstall the plugin run `docker plugin disable logdna` and `docker plugin remove logdna`.
 
+I gave a talk presenting the docker_logdna plugin.
+[The slides](https://ibm.github.io/docker_logdna/2024_02_09_ibm_docker_logdna) can be viewed using a browser.
+
 ## Docker Compose and the Config
 If you prefer docker compose, do this:
 ```yaml
