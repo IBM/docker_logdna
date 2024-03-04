@@ -11,6 +11,5 @@ jobs:
 
       - name: Run Docker-in-Docker End-to-End Test
         run: |
-          # docker compose up --abort-on-container-exit --exit-code-from test_client
           docker compose up
 
