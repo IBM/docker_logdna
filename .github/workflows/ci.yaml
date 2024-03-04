@@ -9,39 +9,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Install Rust
+      - name: Run Docker-in-Docker End-to-End Test
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          source "$HOME/.cargo/env"
-          rustup update
+          docker compose up --abort-on-container-exit --exit-code-from test_client
 
-      - name: Build and Test Plugin
-        run: |
-          if docker plugin ls | grep logdna:latest; then
-              docker plugin disable -f logdna:latest || true
-              docker plugin remove -f logdna:latest || true
-          fi
-
-          mkdir ./plugin/rootfs
-          docker build -t rootfsimage .
-          docker export $(docker create rootfsimage true) | tar -x -C ./plugin/rootfs
-          docker plugin create logdna ./plugin
-          rm -r ./plugin/rootfs
-          docker plugin enable logdna
-
-      - name: Build Mock Client
-        run: |
-          cd $GITHUB_WORKSPACE/mock/client
-          docker build -t mock_client -f Dockerfile ..
-
-      - name: Build Mock Server
-        run: |
-          source "$HOME/.cargo/env"
-          cd $GITHUB_WORKSPACE/mock/server
-          cargo build
-
-      - name: Build Dind Test Driver
-        run: |
-          source "$HOME/.cargo/env"
-          cd $GITHUB_WORKSPACE/dind_test_driver
-          cargo build
