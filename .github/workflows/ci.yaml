@@ -9,13 +9,25 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      # - name: Run Docker-in-Docker End-to-End Test
-      #   run: |
-      #     docker compose up
+      - name: Install Docker Compose
+        run: |
+          # Add Docker's official GPG key:
+          sudo apt-get update
+          sudo apt-get install ca-certificates curl
+          sudo install -m 0755 -d /etc/apt/keyrings
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+          # Add the repository to Apt sources:
+          echo \
+            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+            $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+
+          sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       - name: Run Docker-in-Docker End-to-End Test
-        uses: isbang/compose-action@v1.5.1
-        with:
-          compose-file: "./docker-compose.yml"
-          up-flags: "--abort-on-container-exit --exit-code-from test_client"
+        run: |
+          docker compose up --abort-on-container-exit --exit-code-from test_client
 
