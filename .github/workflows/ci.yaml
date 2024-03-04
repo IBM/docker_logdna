@@ -27,9 +27,7 @@ jobs:
 
           sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-          sudo dockerd &
-
       - name: Run Docker-in-Docker End-to-End Test
         run: |
-          docker compose up --abort-on-container-exit --exit-code-from test_client
+          sudo dockerd & docker compose up --abort-on-container-exit --exit-code-from test_client
 
