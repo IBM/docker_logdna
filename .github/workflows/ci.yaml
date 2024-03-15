@@ -20,17 +20,21 @@ jobs:
 
       - name: Clippy
         run: |
+          . "$HOME/.cargo/env"
           cargo clippy -- -W clippy::unwrap_used -A clippy::useless_format -D warnings
 
       - name: Test Debug
         run: |
+          . "$HOME/.cargo/env"
           cargo test
 
       - name: Test Release
         run: |
+          . "$HOME/.cargo/env"
           cargo test --release
 
       - name: Build Release
         run: |
+          . "$HOME/.cargo/env"
           cargo build --release --target x86_64-unknown-linux-musl
 
