@@ -6,10 +6,29 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
+      - name: Install Rust
+        run: |
+          apt-get update
+          apt-get install -y musl-tools musl-dev protobuf-compiler
+          rustup target add x86_64-unknown-linux-musl
+          rustup component add clippy
+
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Build Docker Image
+      - name: Clippy
         run: |
-          docker build -t rootfsimage .
+          cargo clippy -- -W clippy::unwrap_used -A clippy::useless_format -D warnings
+
+      - name: Test Debug
+        run: |
+          cargo test
+
+      - name: Test Release
+        run: |
+          cargo test --release
+
+      - name: Build Release
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
 
