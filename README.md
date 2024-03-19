@@ -112,6 +112,9 @@ More information on building plugins can be found in the [Docker documentation](
 
 When you run `cargo test` on your host machine, make sure ports `9000` to `9500` are vacant, as they are being used for testing.
 
+If you want to push the plugin to this repo use `docker plugin push ghcr.io/ibm/docker-logdna:YOUR_VERSION`.
+That is `docker plugin push [...]` and not `docker push [...]`.
+
 ## Testing on the Host
 Install the logdna plugin and start [a log-producing Docker container](./mock/client) and a [logdna mock server](./mock/server).
 
