@@ -1,3 +1,4 @@
+# Moved to https://codeberg.org/ibm/docker_logdna
 # docker_logdna
 Logdna logging driver Docker plugin.
 
